@@ -1,0 +1,7 @@
+UPDATE <%= @table %>
+SET option_value = '<%= @siteurl %>'
+WHERE option_name = 'siteurl';
+
+UPDATE <%= @table %>
+SET option_value = '<%= @home %>'
+WHERE option_name = 'home';
