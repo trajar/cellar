@@ -6,3 +6,6 @@ description      'LWRPs for managing aws-s3 backups'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
 version          '0.1.0'
 recipe           'cellar', 'Installs aws-s3 gems and LWRPs'
+
+depends 'build-essential'
+depends 'xml'

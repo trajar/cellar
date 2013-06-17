@@ -1,78 +1,84 @@
 
-action :backup do
-
-
-end
-
 action :restore do
 
-  backup_name = latest_backup()
-  s3_backup = File.join Chef::Config[:file_cache_path], backup_name
-  sql_temp = File.join Chef::Config[:file_cache_path], "#{backup_name}.sql"
+  require 'rubygems'
+  require 'rake'
+  require 'aws-sdk'
+
+  bucket = @new_resource.bucket
+  access_key_id = @new_resource.access_key_id
+  siteurl = @new_resource.siteurl
+  home = @new_resource.home
+  secret_access_key = @new_resource.secret_access_key
+  db_pwd = node['mysql']['server_root_password']
+  db_name = node['wordpress']['db']['database']
+
+  if @new_resource.backup.eql? :latest
+    backup_name = latest_backup(bucket)
+  else
+    backup_name = @new_resource.backup
+  end
+
+  s3_backup = ::File.join Chef::Config[:file_cache_path], backup_name
 
   s3_file s3_backup do
-    source "s3://#{@new_resource.bucket}/#{backup_name}"
-    access_key_id @new_resource.access_key_id,
-    secret_access_key @new_resource.secret_access_key,
+    source "s3://#{bucket}/#{backup_name}"
+    access_key_id access_key_id
+    secret_access_key secret_access_key
     owner 'root'
     mode 0644
     not_if do
-      File.exists?(s3_backup)
+      ::File.exists?(s3_backup)
     end
   end
 
-  execute "#{backup_name}-untar" do
+  execute "#{bucket}-untar" do
     cwd node['wordpress']['dir']
-    command "tar -xzf #{s3_backup}"
+    command "tar -xzf #{s3_backup} &&
+             find . -maxdepth 1 -type f -name \"*.sql\" -exec {} > /usr/bin/mysql --user=root --password=#{db_pwd} #{db_name} \\; "
     user 'root'
     umask 0644
   end
 
-  execute "#{backup_name}-chmod" do
+  execute "#{bucket}-chmod" do
     cwd node['wordpress']['dir']
     command "find . -type d -exec chmod 755 {} \\; &&
              find . -type f -exec chmod 644 {} \\; &&
              chown root:root wp-config.php"
   end
 
-  execute "#{backup_name}-databse" do
-    db_pwd = node['mysql']['server_root_password']
-    db_name = node['wordpress']['db']['database']
-    FileList.new(File.join(node['wordpress']['dir'],'*.sql')).each do |sql_backup|
-      command "/usr/bin/mysql -u root -p \"#{db_pwd}\" #{db_name} < #{sql_backup}"
+  unless siteurl.nil? || home.nil?
+    execute "#{bucket}-site" do
+      db_pwd = node['mysql']['server_root_password']
+      db_name = node['wordpress']['db']['database']
+      table = 'wp_options'
+      command "/usr/bin/mysql --user=root --password=#{db_pwd} #{db_name} -e \"
+              UPDATE #{table}
+              SET option_value = '#{siteurl}'
+              WHERE option_name = 'siteurl';
+
+              UPDATE #{table}
+              SET option_value = '#{home}'
+              WHERE option_name = 'home';
+      \""
     end
   end
 
-  execute "#{backup_name}-site" do
-    db_pwd = node['mysql']['server_root_password']
-    db_name = node['wordpress']['db']['database']
-    command "/usr/bin/mysql -u root -p \"#{db_pwd}\" #{db_name} < #{sql_temp}"
-    action :nothing
-  end
-
-  template sql_temp do
-    source 'wordpress.sql.erb'
-    owner 'root'
-    group 'root'
-    mode '0600'
-    variables(
-        :table => 'wp_options',
-        :siteurl => node['fqdn'],
-        :home => node['fqdn']
-    )
-    notifies :run, "execute[#{backup_name}-site]", :immediately
+  execute "#{bucket}-cleanup" do
+    cwd node['wordpress']['dir']
+    command "rm -f *.sql && rm -f #{s3_backup}"
   end
 
 end
 
 private
 
-def latest_backup()
+def latest_backup(bucket_name)
 
   s3 = AWS::S3.new(:access_key_id => @new_resource.access_key_id, :secret_access_key => @new_resource.secret_access_key)
-  bucket = s3.buckets[@new_resource.bucket]
+  bucket = s3.buckets[bucket_name]
   if bucket.nil? || !bucket.exists?
-    raise "Unable to locate aws bucket [#{options[:bucket]}]."
+    raise "Unable to locate aws bucket [#{bucket_name}]."
   end
 
   items = Array.new
@@ -80,7 +86,7 @@ def latest_backup()
     items.push obj if obj.key.end_with? '.tar.gz'
   end
 
-  if items.empy?
+  if items.empty?
     items.sort! { |a,b| b.last_modified <=> a.last_modified }
   else
     items.first.key
