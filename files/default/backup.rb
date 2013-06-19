@@ -12,6 +12,7 @@ options[:secret_access_key] = nil
 options[:bucket] = nil
 options[:backup_dir] = nil
 options[:keep] = 5
+options[:remove_local] = true
 
 # parse options
 OptionParser.new do |opts|
@@ -37,6 +38,9 @@ OptionParser.new do |opts|
   end
   opts.on('-k', '--keep NUM') do |v|
     options[:keep] = v.to_i
+  end
+  opts.on('-r', '--[no-]remove') do |v|
+    options[:remove_local] = v
   end
 end.parse!
 
@@ -68,6 +72,7 @@ tarballs.each do |tarball|
     obj.write(:file => tarball)
     sleep 1
   end
+  File.delete tarball if options[:remove_local]
 end
 
 # read all backup files, keeping only the most recent

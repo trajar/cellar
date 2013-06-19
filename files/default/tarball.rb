@@ -6,9 +6,9 @@ require 'optparse'
 
 options = {}
 options[:verbose] = false
-options[:git_dir] = nil
+options[:tarball_dir] = nil
 options[:output_dir] = '.'
-options[:format] = 'git-%Y%m%d%H%M%S'
+options[:format] = 'backup-%Y%m%d%H%M%S.tar.gz'
 
 # parse options
 OptionParser.new do |opts|
@@ -21,7 +21,7 @@ OptionParser.new do |opts|
     options[:verbose] = v
   end
   opts.on('-d', '--dir STR') do |v|
-    options[:git_dir] = v
+    options[:tarball_dir] = v
   end
   opts.on('-o', '--output STR') do |v|
     options[:output_dir] = v
@@ -31,11 +31,11 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-# dump git directory to tarball
-if options[:git_dir].nil?
+# compress directory to tarball
+if options[:tarball_dir].nil?
   raise 'Directory not specified.'
 end
-unless Dir.exists? options[:git_dir]
-  raise "Unable to locate directory [#{options[:bucket]}]."
+unless Dir.exists? options[:tarball_dir]
+  raise "Unable to locate directory [#{options[:tarball_dir]}]."
 end
-sh "tar -cvzf #{options[:output_dir]}/#{::Time.now.strftime(options[:format])}.tar.gz #{options[:git_dir]}"
+sh "tar -czf #{options[:output_dir]}/#{::Time.now.strftime(options[:format])} -C / #{options[:tarball_dir]}"

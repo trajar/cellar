@@ -7,16 +7,20 @@ action :restore do
 
   bucket = @new_resource.bucket
   access_key_id = @new_resource.access_key_id
+  secret_access_key = @new_resource.secret_access_key
   siteurl = @new_resource.siteurl
   home = @new_resource.home
-  secret_access_key = @new_resource.secret_access_key
   db_pwd = node['mysql']['server_root_password']
   db_name = node['wordpress']['db']['database']
 
   if @new_resource.backup.eql? :latest
-    backup_name = latest_backup(bucket)
+    backup_name = latest_backup(bucket, access_key_id, secret_access_key)
   else
     backup_name = @new_resource.backup
+  end
+
+  if backup_name.nil? || backup_name.empty?
+    return
   end
 
   s3_backup = ::File.join Chef::Config[:file_cache_path], backup_name
@@ -70,29 +74,6 @@ action :restore do
              find . -type f -exec chmod 644 {} \\; &&
              chown -R www-data:www-data * &&
              chown root:root wp-config.php"
-  end
-
-end
-
-private
-
-def latest_backup(bucket_name)
-
-  s3 = AWS::S3.new(:access_key_id => @new_resource.access_key_id, :secret_access_key => @new_resource.secret_access_key)
-  bucket = s3.buckets[bucket_name]
-  if bucket.nil? || !bucket.exists?
-    raise "Unable to locate aws bucket [#{bucket_name}]."
-  end
-
-  items = Array.new
-  bucket.objects.each do |obj|
-    items.push obj if obj.key.end_with? '.tar.gz'
-  end
-
-  if items.empty?
-    items.sort! { |a,b| b.last_modified <=> a.last_modified }
-  else
-    items.first.key
   end
 
 end
