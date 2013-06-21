@@ -12,16 +12,11 @@ directory "#{node['cellar']['dir']}" do
   recursive true
 end
 
-cookbook_file "#{node['cellar']['dir']}/backup.rb" do
-  source 'backup.rb'
-  mode 0755
-  owner "root"
-  group "root"
-end
-
-cookbook_file "#{node['cellar']['dir']}/tarball.rb" do
-  source 'tarball.rb'
-  mode 0755
-  owner "root"
-  group "root"
+%w(backup_dir.rb, backup_files.rb, cellar.rb, cleaner.rb, options.rb uploader.rb).each do |file|
+  cookbook_file "#{node['cellar']['dir']}/#{file}" do
+    source "#{file}"
+    mode '0755'
+    owner 'root'
+    group 'root'
+  end
 end
