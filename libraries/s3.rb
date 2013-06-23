@@ -43,6 +43,7 @@ class Chef
             end
           end
         end
+
         enforce_ownership_and_permissions
 
         @new_resource.updated_by_last_action?
@@ -58,15 +59,16 @@ class Chef
               :secret_access_key => @new_resource.secret_access_key
           ).buckets[bucket].objects[name]
           Chef::Log.debug("Downloading #{name} from S3 bucket #{bucket}")
-          file = Tempfile.new("chef-s3-file")
-          obj.read do |chunk|
-            file.write(chunk)
-          end
-          Chef::Log.debug("File #{name} is #{file.size} bytes on disk")
+          file = Tempfile.new("chef-#{name}")
           begin
+            obj.read do |chunk|
+              file.write(chunk)
+            end
+            Chef::Log.debug("File #{name} is #{file.size} bytes on disk")
             yield file
           ensure
             file.close
+            file.unlink
           end
         rescue URI::InvalidURIError
           Chef::Log.warn("Expected an S3 URL but found #{source}")

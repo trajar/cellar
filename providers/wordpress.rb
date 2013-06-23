@@ -1,75 +1,85 @@
 
-action :restore do
-
-  require 'rubygems'
-  require 'rake'
-  require 'aws-sdk'
+action :backup do
 
   bucket = @new_resource.bucket
   access_key_id = @new_resource.access_key_id
   secret_access_key = @new_resource.secret_access_key
-  siteurl = @new_resource.siteurl
-  home = @new_resource.home
-  db_pwd = node['mysql']['server_root_password']
-  db_name = node['wordpress']['db']['database']
+  database = @new_resource.database
+  db_user = @new_resource.db_user
+  db_password = @new_resource.db_password
+  mysql_pattern = @new_resource.mysql_pattern
+  mysql_file_name = @new_resource.mysql_file_name
+  site_dir = @new_resource.site_dir
+  site_pattern = @new_resource.site_pattern
+  site_file_name = @new_resource.site_file_name
+  keep = @new_resource.keep
 
-  if @new_resource.backup.eql? :latest
-    backup_name = latest_backup(bucket, access_key_id, secret_access_key)
-  else
-    backup_name = @new_resource.backup
+  cellar_dir "#{@new_resource}-site" do
+    bucket bucket
+    access_key_id access_key_id
+    secret_access_key secret_access_key
+    dir site_dir
+    exclude ['wp-config.php', '*/wp-backup/*.*' '*.tar.gz', '.git', '.svn']
+    pattern site_pattern if site_pattern
+    keep keep if keep
+    file_name site_file_name if site_file_name
+    action :backup
   end
 
-  if backup_name.nil? || backup_name.empty?
-    return
+  cellar_mysql "#{@new_resource}-mysql" do
+    bucket bucket
+    access_key_id access_key_id
+    secret_access_key secret_access_key
+    database database
+    db_user db_user
+    db_password db_password
+    pattern mysql_pattern if mysql_pattern
+    keep keep if keep
+    file_name mysql_file_name if mysql_file_name
+    action :backup
   end
 
-  s3_backup = ::File.join Chef::Config[:file_cache_path], backup_name
+end
 
-  unless ::File.exists? s3_backup
-    s3_file s3_backup do
-      source "s3://#{bucket}/#{backup_name}"
-      access_key_id access_key_id
-      secret_access_key secret_access_key
-      owner 'root'
-      mode 0644
-      not_if do
-        ::File.exists?(s3_backup)
-      end
-    end
+action :restore do
+
+  bucket = @new_resource.bucket
+  access_key_id = @new_resource.access_key_id
+  secret_access_key = @new_resource.secret_access_key
+  database = @new_resource.database
+  db_user = @new_resource.db_user
+  db_password = @new_resource.db_password
+  mysql_pattern = @new_resource.mysql_pattern
+  mysql_file_name = @new_resource.mysql_file_name
+  site_dir = @new_resource.site_dir
+  site_pattern = @new_resource.site_pattern
+  site_file_name = @new_resource.site_file_name
+  backup = @new_resource.backup
+
+  cellar_dir "#{@new_resource}-site" do
+    bucket bucket
+    access_key_id access_key_id
+    secret_access_key secret_access_key
+    dir site_dir
+    pattern site_pattern if site_pattern
+    backup backup if backup
+    action :restore
   end
 
-  execute "#{bucket}-untar" do
-    cwd node['wordpress']['dir']
-    command "tar -xzf #{s3_backup} &&
-             find . -maxdepth 1 -type f -name \"*.sql\" -exec cat {} \\; | /usr/bin/mysql --user=root --password=#{db_pwd} #{db_name} "
-    user 'root'
-    umask 0644
+  cellar_mysql "#{@new_resource}-mysql" do
+    bucket bucket
+    access_key_id access_key_id
+    secret_access_key secret_access_key
+    database database
+    db_user db_user
+    db_password db_password
+    pattern mysql_pattern if mysql_pattern
+    backup backup if backup
+    action :restore
   end
 
-  unless siteurl.nil? || home.nil?
-    execute "#{bucket}-site" do
-      db_pwd = node['mysql']['server_root_password']
-      db_name = node['wordpress']['db']['database']
-      table = 'wp_options'
-      command "/usr/bin/mysql --user=root --password=#{db_pwd} #{db_name} -e \"
-              UPDATE #{table}
-              SET option_value = '#{siteurl}'
-              WHERE option_name = 'siteurl';
-
-              UPDATE #{table}
-              SET option_value = '#{home}'
-              WHERE option_name = 'home';
-      \""
-    end
-  end
-
-  execute "#{bucket}-cleanup" do
-    cwd node['wordpress']['dir']
-    command "rm -f *.sql && rm -f #{s3_backup}"
-  end
-
-  execute "#{bucket}-chmod" do
-    cwd node['wordpress']['dir']
+  execute "#{@new_resource.name}-chmod" do
+    cwd "#{site_dir}"
     command "find . -type d -exec chmod 755 {} \\; &&
              find . -type f -exec chmod 644 {} \\; &&
              chown -R www-data:www-data * &&

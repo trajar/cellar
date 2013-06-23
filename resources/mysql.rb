@@ -5,10 +5,12 @@ attribute :bucket,              :kind_of => String, :default => 'cellar'
 attribute :access_key_id,       :kind_of => String
 attribute :secret_access_key,   :kind_of => String
 
-attribute :git_dir,             :kind_of => String
+attribute :database,            :kind_of => String
+attribute :db_user,             :kind_of => String
+attribute :db_password,         :kind_of => String
 
 attribute :backup,              :kind_of => String, :default => 'latest'
-attribute :pattern,             :kind_of => Regexp, :default => /^git-.+\.tar\.gz$/i
+attribute :pattern,             :kind_of => Regexp, :default => /^mysql-.+\.gz$/i
 attribute :keep,                :kind_of => Integer
 
-attribute :file_name,           :kind_of => String, :default => 'git-%Y%m%d%H%M%S.tar.gz'
+attribute :file_name,           :kind_of => String, :default => 'mysql-%Y%m%d%H%M%S.gz'

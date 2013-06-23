@@ -4,20 +4,18 @@ module Cellar
 
     def initialize(args)
       @remove_local = true
-      @pattern = /.\..tar\.gz$/i
       args.each do |k,v|
         instance_variable_set("@#{k}", v) unless v.nil?
       end
     end
 
-    def upload_file(file)
-      basename = File.basename file
-      obj = bucket.objects[basename]
+    def upload_file(file, name = nil)
+      name = File.basename(file) if name.nil?
+      obj = bucket.objects[name]
       if obj.exists?
-        Cellar.logger.debug "Backup file [#{basename}] already exists."
+        Cellar.logger.debug "Backup file [#{name}] already exists."
       else
-        Cellar.logger.info "Uploading backup file [#{basename}] to aws-s3 ..."
-        obj = bucket.objects[basename]
+        Cellar.logger.info "Uploading backup file [#{name}] to aws-s3 ..."
         obj.write(:file => file)
       end
       File.delete file if @remove_local

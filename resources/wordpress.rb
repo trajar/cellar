@@ -1,10 +1,18 @@
 
 actions :backup, :restore
 
-attribute :backup,              :kind_of => String, :default => :latest
-attribute :pattern,             :regex => /^([a-z]|[A-Z]|[0-9]|_|-)+$/, :default => /.\..tar\.gz$/i
 attribute :bucket,              :kind_of => String, :default => 'cellar'
 attribute :access_key_id,       :kind_of => String
 attribute :secret_access_key,   :kind_of => String
-attribute :siteurl,             :kind_of => String
-attribute :home,                :kind_of => String
+
+attribute :backup,              :kind_of => String, :default => 'latest'
+attribute :mysql_pattern,       :kind_of => Regexp, :default => /^wordpress-mysql-.+\.gz$/i
+attribute :site_pattern,        :kind_of => Regexp, :default => /^wordpress-site-.+\.gz$/i
+attribute :mysql_file_name,     :kind_of => String, :default => 'wordpress-mysql-%Y%m%d%H%M%S.gz'
+attribute :site_file_name,      :kind_of => String, :default => 'wordpress-site-%Y%m%d%H%M%S.tar.gz'
+attribute :keep,                :kind_of => Integer
+
+attribute :database,            :kind_of => String, :default => node['wordpress']['db']['database']
+attribute :db_user,             :kind_of => String, :default => 'root'
+attribute :db_password,         :kind_of => String, :default => node['mysql']['server_root_password']
+attribute :site_dir,            :kind_of => String, :default => node['wordpress']['dir']

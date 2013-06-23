@@ -12,7 +12,7 @@ directory "#{node['cellar']['dir']}" do
   recursive true
 end
 
-%w(backup_dir.rb, backup_files.rb, cellar.rb, cleaner.rb, options.rb uploader.rb).each do |file|
+%w(backup_dir.rb backup_files.rb cellar.rb cleaner.rb options.rb downloader.rb uploader.rb).each do |file|
   cookbook_file "#{node['cellar']['dir']}/#{file}" do
     source "#{file}"
     mode '0755'
