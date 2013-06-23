@@ -21,12 +21,12 @@ action :backup do
     script = "#{script} --keep #{keep}"
   end
 
-  cron @new_resource.name do
+  cron "dir-#{dir}-backup" do
     hour node['cellar']['cron']['hour']
     minute node['cellar']['cron']['minute']
-    mailto node['cellar']['mailto']
+    mailto node['cellar']['cron']['mailto']
     action :create
-    command "ruby #{script}"
+    command "#{node['cellar']['ruby']} #{script}"
   end
 
 end

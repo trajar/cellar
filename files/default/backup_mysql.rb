@@ -36,17 +36,16 @@ if opts[:verbose]
 end
 mysqldump = "#{mysqldump} #{dump_options}"
 
-tmp_file = Tempfile.new(['mysqldump', '.tar.gz'])
-tmp_file.close
+tmp_file = File.join Dir.tmpdir, "#{opts[:bucket]}.#{file_name}"
 begin
   # compress directory to tarball
-  Cellar.logger.debug "Compressing mysql database [#{opts[:database]}] to [#{tmp_file.path}] ..."
+  Cellar.logger.debug "Compressing mysql database [#{opts[:database]}] to [#{tmp_file}] ..."
   verbose_flag = opts[:verbose] ? 'v' : ''
-  sh "#{mysqldump} | gzip --best -c#{verbose_flag} > #{tmp_file.path}"
+  sh "#{mysqldump} | gzip --best -c#{verbose_flag} > #{tmp_file}"
   # cleanup
   Cellar::Uploader.new(opts).upload_file tmp_file, file_name
   Cellar::Cleaner.new(opts).cleanup_bucket if opts[:pattern]
 ensure
-  tmp_file.unlink
+  File.delete(tmp_file) if File.exists?(tmp_file)
 end
 

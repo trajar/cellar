@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'tempfile'
+require 'tmpdir'
 require_relative 'cellar'
 
 # parse options
@@ -18,21 +19,20 @@ exclude = opts[:exclude] || ''
 
 raise "Unable to locate directory [#{dir_name}]." unless File.directory?(dir_name)
 
-tmp_file = Tempfile.new(['backup', '.tar.gz'])
-tmp_file.close
+tmp_file = File.join Dir.tmpdir, "#{opts[:bucket]}.#{file_name}"
 begin
   # compress directory to tarball
-  Cellar.logger.debug "Compressing [#{dir_name}] to [#{tmp_file.path}] ..."
+  Cellar.logger.debug "Compressing [#{dir_name}] to [#{tmp_file}] ..."
   verbose_flag = opts[:verbose] ? 'v' : ''
   excludes = ''
   exclude.split(',').each do |exlude_pattern|
     excludes = "#{excludes} --exclude='#{exlude_pattern}'"
   end
-  sh "tar -cpz#{verbose_flag}f #{tmp_file.path} #{excludes} -C #{dir_name} ."
+  system "tar -cpz#{verbose_flag}f #{tmp_file} #{excludes} -C #{dir_name} ."
   # cleanup
   Cellar::Uploader.new(opts).upload_file tmp_file, file_name
   Cellar::Cleaner.new(opts).cleanup_bucket if opts[:pattern]
 ensure
-  tmp_file.unlink
+  File.delete(tmp_file) if File.exists?(tmp_file)
 end
 

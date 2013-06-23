@@ -4,6 +4,12 @@ include_recipe 'xml::ruby'
 
 chef_gem 'aws-sdk'
 
+ruby_block 'cellar-depends' do
+  block do
+    "#{node['cellar']['ruby']} -S gem install awk-sdk"
+  end
+end
+
 directory "#{node['cellar']['dir']}" do
   owner 'root'
   group 'root'
@@ -12,10 +18,19 @@ directory "#{node['cellar']['dir']}" do
   recursive true
 end
 
-%w(backup_dir.rb backup_files.rb cellar.rb cleaner.rb options.rb downloader.rb uploader.rb).each do |file|
+%w(backup_dir.rb backup_files.rb backup_mysql.rb).each do |file|
   cookbook_file "#{node['cellar']['dir']}/#{file}" do
     source "#{file}"
     mode '0755'
+    owner 'root'
+    group 'root'
+  end
+end
+
+%w(cellar.rb cleaner.rb options.rb downloader.rb uploader.rb).each do |file|
+  cookbook_file "#{node['cellar']['dir']}/#{file}" do
+    source "#{file}"
+    mode '0644'
     owner 'root'
     group 'root'
   end
