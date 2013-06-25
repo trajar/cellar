@@ -15,21 +15,21 @@ opts.add(:mysqldump, '-c', '--mysqldump STR')
 opts.parse
 
 # set defaults
-host_name = opts[:file_name] || 'localhost'
+host_name = opts[:host] || 'localhost'
 file_name = opts[:file_name] || 'backup-%Y%m%d%H%M%S.gz'
-dump_options = opts[:options] || '--opt --comments --create-options --default-character-set=utf8mb4 --dump-date --hex-blob --quick --order-by-primary --add-drop-database --add-drop-table'
+dump_options = opts[:options] || '--opt --comments --dump-date --hex-blob --order-by-primary'
 file_name = ::Time.now.strftime(file_name)
 
 raise 'Database not specified.' unless opts[:database]
 
 # build dump command
 mysqldump = opts[:mysqldump] || 'mysqldump'
-mysqldump = "#{mysqldump} --databases #{opts[:database]} --host=#{host_name}"
+mysqldump = "#{mysqldump} --databases \"#{opts[:database]}\" --host=\"#{host_name}\""
 if opts[:user]
-  mysqldump = "#{mysqldump} --user=#{opts[:user]}"
+  mysqldump = "#{mysqldump} --user=\"#{opts[:user]}\""
 end
 if opts[:password]
-  mysqldump = "#{mysqldump} --password=#{opts[:password]}"
+  mysqldump = "#{mysqldump} --password=\"#{opts[:password]}\""
 end
 if opts[:verbose]
   mysqldump = "#{mysqldump} --verbose"
@@ -41,7 +41,7 @@ begin
   # compress directory to tarball
   Cellar.logger.debug "Compressing mysql database [#{opts[:database]}] to [#{tmp_file}] ..."
   verbose_flag = opts[:verbose] ? 'v' : ''
-  sh "#{mysqldump} | gzip --best -c#{verbose_flag} > #{tmp_file}"
+  system "#{mysqldump} | gzip --best -c#{verbose_flag} > #{tmp_file}"
   # cleanup
   Cellar::Uploader.new(opts).upload_file tmp_file, file_name
   Cellar::Cleaner.new(opts).cleanup_bucket if opts[:pattern]
