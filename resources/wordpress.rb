@@ -1,7 +1,7 @@
 
 actions :backup, :restore
 
-attribute :bucket,              :kind_of => String, :default => 'cellar'
+attribute :bucket,              :kind_of => String, :default => nil
 attribute :access_key_id,       :kind_of => String
 attribute :secret_access_key,   :kind_of => String
 
@@ -12,7 +12,7 @@ attribute :mysql_file_name,     :kind_of => String, :default => 'wordpress-mysql
 attribute :site_file_name,      :kind_of => String, :default => 'wordpress-site-%Y%m%d%H%M%S.tar.gz'
 attribute :keep,                :kind_of => Integer
 
-attribute :database,            :kind_of => String, :default => node['wordpress']['db']['database']
+attribute :database,            :kind_of => String, :default => nil
 attribute :db_user,             :kind_of => String, :default => 'root'
 attribute :db_password,         :kind_of => String, :default => node['mysql']['server_root_password']
-attribute :site_dir,            :kind_of => String, :default => node['wordpress']['dir']
+attribute :site_dir,            :kind_of => String, :default => nil

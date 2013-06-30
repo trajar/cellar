@@ -70,7 +70,7 @@ action :restore do
     end
 
     execute "#{@new_resource.name}-restore-from-mysqldump" do
-      command "gzip -cd #{s3_backup} | /usr/bin/mysql --user=#{db_user} --password=#{db_password} #{database}"
+      command "gzip -cd #{s3_backup} | /usr/bin/mysql --user=\"#{db_user}\" --password=\"#{db_password}\" \"#{database}\" "
     end
 
   end

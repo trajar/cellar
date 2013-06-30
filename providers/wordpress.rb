@@ -4,12 +4,12 @@ action :backup do
   bucket = @new_resource.bucket
   access_key_id = @new_resource.access_key_id
   secret_access_key = @new_resource.secret_access_key
-  database = @new_resource.database
+  database = @new_resource.database || bucket
   db_user = @new_resource.db_user
   db_password = @new_resource.db_password
   mysql_pattern = @new_resource.mysql_pattern
   mysql_file_name = @new_resource.mysql_file_name
-  site_dir = @new_resource.site_dir
+  site_dir = @new_resource.site_dir || "/var/www/#{database}"
   site_pattern = @new_resource.site_pattern
   site_file_name = @new_resource.site_file_name
   keep = @new_resource.keep
@@ -46,14 +46,12 @@ action :restore do
   bucket = @new_resource.bucket
   access_key_id = @new_resource.access_key_id
   secret_access_key = @new_resource.secret_access_key
-  database = @new_resource.database
+  database = @new_resource.database || bucket
   db_user = @new_resource.db_user
   db_password = @new_resource.db_password
   mysql_pattern = @new_resource.mysql_pattern
-  mysql_file_name = @new_resource.mysql_file_name
-  site_dir = @new_resource.site_dir
+  site_dir = @new_resource.site_dir || "/var/www/#{database}"
   site_pattern = @new_resource.site_pattern
-  site_file_name = @new_resource.site_file_name
   backup = @new_resource.backup
 
   cellar_dir "#{@new_resource}-site" do
