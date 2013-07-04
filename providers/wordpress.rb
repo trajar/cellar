@@ -13,6 +13,7 @@ action :backup do
   site_pattern = @new_resource.site_pattern
   site_file_name = @new_resource.site_file_name
   keep = @new_resource.keep
+  mailto = @new_resource.mailto
 
   cellar_dir "#{@new_resource}-site" do
     bucket bucket
@@ -23,6 +24,8 @@ action :backup do
     pattern site_pattern if site_pattern
     keep keep if keep
     file_name site_file_name if site_file_name
+    mailto mailto if mailto
+    log_name "cellar-wordpress-site-#{bucket}"
     action :backup
   end
 
@@ -36,6 +39,8 @@ action :backup do
     pattern mysql_pattern if mysql_pattern
     keep keep if keep
     file_name mysql_file_name if mysql_file_name
+    mailto mailto if mailto
+    log_name "cellar-wordpress-mysql-#{bucket}"
     action :backup
   end
 

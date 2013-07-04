@@ -9,6 +9,8 @@ attribute :dir,                 :kind_of => String
 attribute :exclude,             :kind_of => Array, :default => []
 
 attribute :backup,              :kind_of => String, :default => 'latest'
+attribute :mailto,              :kind_of => String, :default => nil
+attribute :log_name,            :kind_of => String, :default => nil
 attribute :pattern,             :kind_of => Regexp, :default => /^dir-.+\.tar\.gz$/i
 attribute :keep,                :kind_of => Integer
 

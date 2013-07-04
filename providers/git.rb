@@ -8,6 +8,7 @@ action :backup do
   pattern = @new_resource.pattern
   keep = @new_resource.keep
   file_name = @new_resource.file_name
+  mailto = @new_resource.mailto
 
   cellar_dir @new_resource.name do
     bucket bucket
@@ -17,6 +18,8 @@ action :backup do
     pattern pattern if pattern
     keep keep if keep
     file_name file_name if file_name
+    mailto mailto if mailto
+    log_name "cellar-git-#{bucket}"
     action :backup
   end
 

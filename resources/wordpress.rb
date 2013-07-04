@@ -6,6 +6,7 @@ attribute :access_key_id,       :kind_of => String
 attribute :secret_access_key,   :kind_of => String
 
 attribute :backup,              :kind_of => String, :default => 'latest'
+attribute :mailto,              :kind_of => String, :default => nil
 attribute :mysql_pattern,       :kind_of => Regexp, :default => /^wordpress-mysql-.+\.gz$/i
 attribute :site_pattern,        :kind_of => Regexp, :default => /^wordpress-site-.+\.gz$/i
 attribute :mysql_file_name,     :kind_of => String, :default => 'wordpress-mysql-%Y%m%d%H%M%S.gz'

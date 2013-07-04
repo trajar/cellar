@@ -12,10 +12,12 @@ action :backup do
   db_password = @new_resource.db_password || node['mysql']['server_root_password']
   pattern = @new_resource.pattern
   keep = @new_resource.keep
+  mailto = @new_resource.mailto || node['cellar']['cron']['mailto']
+  log_name = @new_resource.log_name || "cellar-mysql-#{bucket}"
 
   script = "#{node['cellar']['dir']}/backup_mysql.rb --database \"#{database}\" --user \"#{db_user}\" --password \"#{db_password}\" --bucket \"#{bucket}\" --key \"#{access_key_id}\" --secret \"#{secret_access_key}\""
   if file_name
-    script = "#{script} --name \"#{file_name}\""
+    script = "#{script} --name \"#{file_name.gsub('%', '\%')}\""
   end
   if pattern
     script = "#{script} --cleanup \"#{pattern.to_s}\""
@@ -27,9 +29,10 @@ action :backup do
   cron "mysql-#{database}-backup" do
     hour node['cellar']['cron']['hour']
     minute node['cellar']['cron']['minute']
-    mailto node['cellar']['cron']['mailto']
+    mailto mailto if mailto
+    path "#{node['cellar']['path']}"
+    command "#{node['cellar']['ruby']} #{script} > #{node['cellar']['log_dir']}/#{log_name}.log"
     action :create
-    command "#{node['cellar']['ruby']} #{script}"
   end
 
 end
@@ -55,8 +58,7 @@ action :restore do
 
   unless backup_name.nil? || backup_name.empty?
 
-    s3_backup = ::File.join Chef::Config[:file_cache_path], backup_name
-#   s3_backup = Tempfile.new(backup_name)
+    s3_backup = ::File.join Chef::Config[:file_cache_path], "#{bucket}.#{backup_name}"
 
     s3_file s3_backup do
       source "s3://#{bucket}/#{backup_name}"
