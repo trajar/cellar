@@ -25,7 +25,6 @@ action :backup do
     keep keep if keep
     file_name site_file_name if site_file_name
     mailto mailto if mailto
-    log_name "cellar-wordpress-site-#{bucket}"
     action :backup
   end
 
@@ -40,7 +39,6 @@ action :backup do
     keep keep if keep
     file_name mysql_file_name if mysql_file_name
     mailto mailto if mailto
-    log_name "cellar-wordpress-mysql-#{bucket}"
     action :backup
   end
 

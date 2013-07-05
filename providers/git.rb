@@ -19,7 +19,6 @@ action :backup do
     keep keep if keep
     file_name file_name if file_name
     mailto mailto if mailto
-    log_name "cellar-git-#{bucket}"
     action :backup
   end
 

@@ -13,7 +13,6 @@ action :backup do
   pattern = @new_resource.pattern
   keep = @new_resource.keep
   mailto = @new_resource.mailto || node['cellar']['cron']['mailto']
-  log_name = @new_resource.log_name || "cellar-mysql-#{bucket}"
 
   script = "#{node['cellar']['dir']}/backup_mysql.rb --database \"#{database}\" --user \"#{db_user}\" --password \"#{db_password}\" --bucket \"#{bucket}\" --key \"#{access_key_id}\" --secret \"#{secret_access_key}\""
   if file_name
@@ -31,7 +30,7 @@ action :backup do
     minute node['cellar']['cron']['minute']
     mailto mailto if mailto
     path "#{node['cellar']['path']}"
-    command "#{node['cellar']['ruby']} #{script} > #{node['cellar']['log_dir']}/#{log_name}.log"
+    command "#{node['cellar']['ruby']} #{script}"
     action :create
   end
 
