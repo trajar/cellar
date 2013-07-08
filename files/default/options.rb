@@ -45,7 +45,7 @@ module Cellar
       if @params[:verbose]
         Cellar.logger.level = Logger::DEBUG
       else
-        Cellar.logger.level = Logger::INFO
+        Cellar.logger.level = Logger::WARN
       end
       self
     end

@@ -9,11 +9,14 @@ action :backup do
   pattern = @new_resource.pattern
   keep = @new_resource.keep
   excludes = @new_resource.exclude.join ','
-  mailto = @new_resource.mailto || node['cellar']['cron']['mailto']
+  mailto = @new_resource.mailto
+  hour = @new_resource.hour
+  minute = @new_resource.minute
 
   script = "#{node['cellar']['dir']}/backup_dir.rb --dir \"#{dir}\" --exclude \"#{excludes}\" --bucket \"#{bucket}\" --key \"#{access_key_id}\" --secret \"#{secret_access_key}\""
   if file_name
-    script = "#{script} --name \"#{file_name.gsub('%', '\%')}\""
+#   script = "#{script} --name \"#{file_name.gsub('%', '\%')}\""
+    script = "#{script} --name \"#{file_name}\""
   end
   if pattern
     script = "#{script} --cleanup \"#{pattern.to_s}\""
@@ -23,8 +26,8 @@ action :backup do
   end
 
   cron "dir-#{dir}-backup" do
-    hour node['cellar']['cron']['hour']
-    minute node['cellar']['cron']['minute']
+    hour hour if hour
+    minute minute if minute
     mailto mailto if mailto
     path "#{node['cellar']['path']}"
     command "#{node['cellar']['ruby']} #{script}"

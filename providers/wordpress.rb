@@ -14,6 +14,8 @@ action :backup do
   site_file_name = @new_resource.site_file_name
   keep = @new_resource.keep
   mailto = @new_resource.mailto
+  hour = @new_resource.hour
+  minute = @new_resource.minute
 
   cellar_dir "#{@new_resource}-site" do
     bucket bucket
@@ -24,6 +26,8 @@ action :backup do
     pattern site_pattern if site_pattern
     keep keep if keep
     file_name site_file_name if site_file_name
+    hour hour if hour
+    minute minute if minute
     mailto mailto if mailto
     action :backup
   end
@@ -38,6 +42,8 @@ action :backup do
     pattern mysql_pattern if mysql_pattern
     keep keep if keep
     file_name mysql_file_name if mysql_file_name
+    hour hour if hour
+    minute minute if minute
     mailto mailto if mailto
     action :backup
   end

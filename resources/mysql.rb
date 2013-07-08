@@ -10,7 +10,9 @@ attribute :db_user,             :kind_of => String
 attribute :db_password,         :kind_of => String
 
 attribute :backup,              :kind_of => String, :default => 'latest'
-attribute :mailto,              :kind_of => String, :default => nil
+attribute :minute,              :kind_of => String, :default => node['cellar']['cron']['minute']
+attribute :hour,                :kind_of => String, :default => node['cellar']['cron']['hour']
+attribute :mailto,              :kind_of => String, :default => node['cellar']['cron']['mailto']
 attribute :pattern,             :kind_of => Regexp, :default => /^mysql-.+\.gz$/i
 attribute :keep,                :kind_of => Integer
 

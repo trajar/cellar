@@ -9,6 +9,8 @@ action :backup do
   keep = @new_resource.keep
   file_name = @new_resource.file_name
   mailto = @new_resource.mailto
+  hour = @new_resource.hour
+  minute = @new_resource.minute
 
   cellar_dir @new_resource.name do
     bucket bucket
@@ -18,6 +20,8 @@ action :backup do
     pattern pattern if pattern
     keep keep if keep
     file_name file_name if file_name
+    hour hour if hour
+    minute minute if minute
     mailto mailto if mailto
     action :backup
   end

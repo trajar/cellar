@@ -14,7 +14,7 @@ module Cellar
     unless @logger
       @logger = Logger.new(STDOUT)
       @logger.formatter = proc do |severity, datetime, progname, msg|
-        "#{msg}\n"
+        "#{severity} - #{msg}\n"
       end
     end
     @logger
