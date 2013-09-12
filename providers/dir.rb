@@ -15,8 +15,7 @@ action :backup do
 
   script = "#{node['cellar']['dir']}/backup_dir.rb --dir \"#{dir}\" --exclude \"#{excludes}\" --bucket \"#{bucket}\" --key \"#{access_key_id}\" --secret \"#{secret_access_key}\""
   if file_name
-#   script = "#{script} --name \"#{file_name.gsub('%', '\%')}\""
-    script = "#{script} --name \"#{file_name}\""
+    script = "#{script} --name \"#{file_name.gsub('%', '\%')}\""
   end
   if pattern
     script = "#{script} --cleanup \"#{pattern.to_s}\""

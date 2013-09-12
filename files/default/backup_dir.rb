@@ -29,6 +29,7 @@ begin
     excludes = "#{excludes} --exclude='#{exlude_pattern}'"
   end
   system "tar -cpz#{verbose_flag}f #{tmp_file} #{excludes} -C #{dir_name} ."
+  sleep 1
   # cleanup
   Cellar::Uploader.new(opts).upload_file tmp_file, file_name
   Cellar::Cleaner.new(opts).cleanup_bucket if opts[:pattern]

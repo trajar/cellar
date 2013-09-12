@@ -42,6 +42,7 @@ begin
   Cellar.logger.debug "Compressing mysql database [#{opts[:database]}] to [#{tmp_file}] ..."
   verbose_flag = opts[:verbose] ? 'v' : ''
   system "#{mysqldump} | gzip --best -c#{verbose_flag} > #{tmp_file}"
+  sleep 1
   # cleanup
   Cellar::Uploader.new(opts).upload_file tmp_file, file_name
   Cellar::Cleaner.new(opts).cleanup_bucket if opts[:pattern]
