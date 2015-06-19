@@ -19,7 +19,7 @@ exclude = opts[:exclude] || ''
 
 raise "Unable to locate directory [#{dir_name}]." unless File.directory?(dir_name)
 
-tmp_file = File.join Dir.tmpdir, "#{opts[:bucket]}.#{file_name}"
+tmp_file = File.join Dir.tmpdir, "#{opts[:bucket_name]}.#{file_name}"
 begin
   # compress directory to tarball
   Cellar.logger.debug "Compressing [#{dir_name}] to [#{tmp_file}] ..."
@@ -37,3 +37,4 @@ ensure
   File.delete(tmp_file) if File.exists?(tmp_file)
 end
 
+			

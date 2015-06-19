@@ -1,13 +1,11 @@
 
 module Cellar
-  class Downloader
+  class Downloader < Base
 
     def initialize(args)
       @remove_local = true
       @pattern = /.\..tar\.gz$/i
-      args.each do |k,v|
-        instance_variable_set("@#{k}", v) unless v.nil?
-      end
+      super(args)
     end
 
     def latest_backup()
@@ -32,29 +30,17 @@ module Cellar
       else
         backup_name = file_name
       end
-      obj = bucket.objects[backup_name]
+      obj = bucket.object(backup_name)
       raise "Unable to locate backup [#{backup_name}] - not found." unless obj.exists?
       tmp_file = Tempfile.new([File.basename(backup_name), '.data'])
       begin
-        obj.read do |chunk|
-          tmp_file.write(chunk)
-        end
+        client.get_object({bucket: bucket_name, key: backup_name}, target: tmp_file)
         Cellar.logger.debug("Backup [#{backup_name}] downloaded to #{tmp_file.size} bytes on disk.")
         yield tmp_file
       ensure
         tmp_file.close
         tmp_file.unlink
       end
-    end
-
-    private
-
-    def bucket()
-      @s3_bucket ||= api.buckets[@bucket]
-    end
-
-    def api()
-      @s3_api ||= AWS::S3.new(:access_key_id => @access_key_id, :secret_access_key => @secret_access_key)
     end
 
   end

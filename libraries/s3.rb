@@ -54,21 +54,16 @@ class Chef
           require 'aws-sdk'
           protocol, bucket, name = URI.split(source).compact
           name = name[1..-1]
-          obj = AWS::S3.new(
-              :access_key_id     => @new_resource.access_key_id,
-              :secret_access_key => @new_resource.secret_access_key
-          ).buckets[bucket].objects[name]
+          region = 'us-east-1'
           Chef::Log.debug("Downloading #{name} from S3 bucket #{bucket}")
-          file = Tempfile.new("chef-#{name}")
+          client = Aws::S3::Client.new(region: region, credentials: Aws::Credentials.new(@new_resource.access_key_id, @new_resource.secret_access_key))          
+          tmp_file = Tempfile.new("chef-#{name}")
           begin
-            obj.read do |chunk|
-              file.write(chunk)
-            end
-            Chef::Log.debug("File #{name} is #{file.size} bytes on disk")
-            yield file
+            client.get_object({bucket: bucket, key: name}, target: tmp_file)
+            yield tmp_file                    
           ensure
-            file.close
-            file.unlink
+            tmp_file.close
+            tmp_file.unlink
           end
         rescue URI::InvalidURIError
           Chef::Log.warn("Expected an S3 URL but found #{source}")

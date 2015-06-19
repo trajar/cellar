@@ -16,7 +16,7 @@ action :backup do
   hour = @new_resource.hour
   minute = @new_resource.minute
 
-  script = "#{node['cellar']['dir']}/backup_mysql.rb --database \"#{database}\" --user \"#{db_user}\" --password \"#{db_password}\" --bucket \"#{bucket}\" --key \"#{access_key_id}\" --secret \"#{secret_access_key}\""
+  script = "#{node['cellar']['dir']}/backup_mysql.rb --database \"#{database}\" --user \"#{db_user}\" --password \"#{db_password}\" --bucket_name \"#{bucket}\" --key \"#{access_key_id}\" --secret \"#{secret_access_key}\""
   if file_name
     script = "#{script} --name \"#{file_name.gsub('%', '\%')}\""
   end
@@ -52,7 +52,7 @@ action :restore do
   backup = @new_resource.backup
 
   if backup.eql?(:latest) || backup.eql?('latest') || backup.nil?
-    backup_name = ::Cellar::Downloader.new(:bucket => bucket, :access_key_id => access_key_id, :secret_access_key => secret_access_key, :pattern => pattern).latest_backup
+    backup_name = ::Cellar::Downloader.new(:bucket_name => bucket, :access_key_id => access_key_id, :secret_access_key => secret_access_key, :pattern => pattern).latest_backup
   else
     backup_name = backup
   end

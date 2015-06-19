@@ -1,13 +1,11 @@
 
 module Cellar
-  class Cleaner
+  class Cleaner < Base
 
     def initialize(args)
       @keep = 5
       @pattern = /.\..tar\.gz$/i
-      args.each do |k,v|
-        instance_variable_set("@#{k}", v) unless v.nil?
-      end
+      super(args)
     end
 
     def cleanup_bucket()
@@ -27,16 +25,6 @@ module Cellar
           end
         end
       end
-    end
-
-    private
-
-    def bucket()
-      @s3_bucket ||= api.buckets[@bucket]
-    end
-
-    def api()
-      @s3_api ||= AWS::S3.new(:access_key_id => @access_key_id, :secret_access_key => @secret_access_key)
     end
 
   end

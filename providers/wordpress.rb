@@ -22,7 +22,7 @@ action :backup do
     access_key_id access_key_id
     secret_access_key secret_access_key
     dir site_dir
-    exclude ['wp-config.php', '*/wp-backup/*.*' '*.tar.gz', '.git', '.svn']
+    exclude ['wp-meta.php', '*/wp-backup/*.*' '*.tar.gz', '.git', '.svn']
     pattern site_pattern if site_pattern
     keep keep if keep
     file_name site_file_name if site_file_name
@@ -90,7 +90,7 @@ action :restore do
     command "find . -type d -exec chmod 755 {} \\; &&
              find . -type f -exec chmod 644 {} \\; &&
              chown -R www-data:www-data * &&
-             chown root:root wp-config.php"
+             chown root:root wp-meta.php"
   end
 
 end

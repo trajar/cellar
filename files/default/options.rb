@@ -20,12 +20,12 @@ module Cellar
         @params[:secret_access_key] = v
       end
       @parser.on('-b', '--bucket STR') do |v|
-        @params[:bucket] = v
+        @params[:bucket_name] = v
       end
       @parser.on('-r', '--[no-]remove') do |v|
         @params[:remove_local] = v
       end
-      @parser.on('-b', '--cleanup STR') do |v|
+      @parser.on('-c', '--cleanup STR') do |v|
         @params[:pattern] = Regexp::new(v)
       end
       @parser.on('-k', '--keep NUM') do |v|

@@ -3,6 +3,8 @@ require 'rubygems'
 require 'rake'
 require 'aws-sdk'
 require 'optparse'
+require 'logger'  
+require_relative 'base.rb'
 require_relative 'options.rb'
 require_relative 'cleaner.rb'
 require_relative 'downloader.rb'
@@ -12,7 +14,7 @@ module Cellar
 
   def self.logger
     unless @logger
-      @logger = Logger.new(STDOUT)
+      @logger = ::Logger.new(STDOUT)
       @logger.formatter = proc do |severity, datetime, progname, msg|
         "#{severity} - #{msg}\n"
       end

@@ -36,7 +36,7 @@ if opts[:verbose]
 end
 mysqldump = "#{mysqldump} #{dump_options}"
 
-tmp_file = File.join Dir.tmpdir, "#{opts[:bucket]}.#{file_name}"
+tmp_file = File.join Dir.tmpdir, "#{opts[:bucket_name]}.#{file_name}"
 begin
   # compress directory to tarball
   Cellar.logger.debug "Compressing mysql database [#{opts[:database]}] to [#{tmp_file}] ..."
