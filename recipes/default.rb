@@ -3,12 +3,7 @@ include_recipe 'build-essential'
 include_recipe 'xml::ruby'
 
 chef_gem 'aws-sdk'
-
-ruby_block 'cellar-depends' do
-  block do
-    "sudo #{node['cellar']['gem']} install awk-sdk"
-  end
-end
+gem_package 'aws-sdk'
 
 directory "#{node['cellar']['dir']}" do
   owner 'root'

@@ -89,8 +89,7 @@ action :restore do
     cwd "#{site_dir}"
     command "find . -type d -exec chmod 755 {} \\; &&
              find . -type f -exec chmod 644 {} \\; &&
-             chown -R www-data:www-data * &&
-             chown root:root wp-meta.php"
+             chown -R www-data:www-data *"
   end
 
 end

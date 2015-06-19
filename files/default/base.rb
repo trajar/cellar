@@ -5,7 +5,6 @@ module Cellar
     def initialize(args)
       args.each do |k,v|
         instance_variable_set("@#{k}", v) unless v.nil?
-        Cellar.logger.debug "Initializing #{k} = #{v}"
       end
     end
 
@@ -14,7 +13,6 @@ module Cellar
     end
 
     def bucket()
-      Cellar.logger.debug "Loading bucket [#{@bucket_name}] ..."
       @s3_bucket ||= resource.bucket(@bucket_name)
     end
 
